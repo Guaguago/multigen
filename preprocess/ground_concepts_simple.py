@@ -10,6 +10,8 @@ import numpy as np
 import multiprocessing 
 import sys
 
+from idea import PREPROCESS, IDEA
+
 blacklist = set(["from", "as", "more", "either", "in", "and", "on", "an", "when", "too", "to", "i", "do", "can", "be", "that", "or", "the", "a", "of", "for", "is", "was", "the", "-PRON-", "actually", "likely", "possibly", "want",
                  "make", "my", "someone", "sometimes_people", "sometimes","would", "want_to",
                  "one", "something", "sometimes", "everybody", "somebody", "could", "could_be","mine","us","em",
@@ -54,6 +56,7 @@ def match_mentioned_concepts(sents, answers):
 
         all_concepts = hard_ground(s + ' ' + a)
         #print(all_concepts)
+        PREPROCESS()  # 3. extract all 1-gram concepts from input(question) and lable(answer)
         question_concepts = hard_ground(s)
         #print(question_concepts)
 
@@ -87,7 +90,8 @@ def grounding_sentences(src, tgt, type, path):
     #res[0]["qc"] = reduce_redundant_concepts(res[0]["qc"])
     
     with open(path + "/{}/concepts_nv.json".format(type), 'w') as f:
-        for line in res:            
+        for line in res:
+            PREPROCESS()  # 3.1 to json
             json.dump(line, f)
             f.write('\n')
 
@@ -123,10 +127,10 @@ TGT_FILE = DATA_PATH + "/{}/target.csv"
 
 read_model_vocab(config["paths"]["gpt2_vocab"])
 
-TYPE='train'
-src = read_csv(SRC_FILE.format(TYPE))
-tgt = read_csv(TGT_FILE.format(TYPE))
-grounding_sentences(src, tgt, TYPE, DATA_PATH)
+# TYPE='train'
+# src = read_csv(SRC_FILE.format(TYPE))
+# tgt = read_csv(TGT_FILE.format(TYPE))
+# grounding_sentences(src, tgt, TYPE, DATA_PATH)
 
 TYPE='dev'
 src = read_csv(SRC_FILE.format(TYPE))

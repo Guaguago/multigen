@@ -2,6 +2,8 @@ import configparser
 import json
 from tqdm import tqdm
 
+from idea import PREPROCESS
+
 relation_mapping = dict()
 
 
@@ -86,4 +88,5 @@ def extract_english():
 if __name__ == "__main__":
     load_merge_relation()
     print(relation_mapping)
+    PREPROCESS()  # 1. extract english triplets
     extract_english()

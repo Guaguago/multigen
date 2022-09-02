@@ -10,9 +10,14 @@ import time
 import timeit
 import nltk
 import json
+
 # print('NLTK Version: %s' % (nltk.__version__))
+from idea import PREPROCESS, QUESTION, IDEA
+
 nltk.download('stopwords')
 nltk_stopwords = nltk.corpus.stopwords.words('english')
+
+PREPROCESS()  # 2.1 custom stopwords
 nltk_stopwords += ["like", "gone", "did", "going", "would", "could", "get", "in", "up", "may", "wanter"]
 
 config = configparser.ConfigParser()
@@ -24,6 +29,7 @@ relation2id = None
 id2relation = None
 id2concept = None
 blacklist = set(["uk", "us", "take", "make", "object", "person", "people"])
+
 
 def load_resources():
     global concept2id, relation2id, id2relation, id2concept
@@ -43,9 +49,12 @@ def load_resources():
             relation2id[w.strip()] = len(relation2id)
     print("relation2id done")
 
+
 def save_cpnet():
     global concept2id, relation2id, id2relation, id2concept, blacklist
     load_resources()
+
+    PREPROCESS()  # 2. construct real graph
     graph = nx.MultiDiGraph()
     with open(config["paths"]["conceptnet_en"], "r", encoding="utf8") as f:
         lines = f.readlines()
@@ -53,6 +62,7 @@ def save_cpnet():
         def not_save(cpt):
             if cpt in blacklist:
                 return True
+            IDEA()  # UNDO: only keep single word concept
             for t in cpt.split("_"):
                 if t in nltk_stopwords:
                     return True
@@ -71,14 +81,15 @@ def save_cpnet():
             if id2relation[rel] == "relatedto" or id2relation[rel] == "antonym":
                 weight -= 0.3
                 # continue
-            if subj == obj: # delete loops
+            IDEA()  # UNDO: self loop weight
+            if subj == obj:  # delete loops
                 continue
-            weight = 1+float(math.exp(1-weight))
+            QUESTION()  # why decrease
+            weight = 1 + float(math.exp(1 - weight))
             graph.add_edge(subj, obj, rel=rel, weight=weight)
-            graph.add_edge(obj, subj, rel=rel+len(relation2id), weight=weight)
-
+            graph.add_edge(obj, subj, rel=rel + len(relation2id), weight=weight)
 
     nx.write_gpickle(graph, config["paths"]["conceptnet_en_graph"])
-    
+
 
 save_cpnet()
