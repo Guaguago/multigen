@@ -57,12 +57,15 @@ def extract_english():
                     tail = del_pos(ls[3]).split("/")[-1].lower()
 
                     if not head.replace("_", "").replace("-", "").isalpha():
+                        pbar.update(1)
                         continue
 
                     if not tail.replace("_", "").replace("-", "").isalpha():
+                        pbar.update(1)
                         continue
 
                     if rel not in relation_mapping:
+                        pbar.update(1)
                         continue
                     rel = relation_mapping[rel]
                     if rel.startswith("*"):
@@ -74,7 +77,7 @@ def extract_english():
                     data = json.loads(ls[4])
 
                     only_english.append("\t".join([rel, head, tail, str(data["weight"])]))
-                    pbar.update(1)
+                pbar.update(1)
 
     with open(config["paths"]["conceptnet_en"], "w", encoding="utf8") as f:
         f.write("\n".join(only_english))
