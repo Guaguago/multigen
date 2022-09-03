@@ -32,6 +32,9 @@ def hard_ground(sent):
     doc = nlp(sent)
     res = set()
     for t in doc:
+        PREPROCESS()  # 3.1 extract concepts in the ConceptNet
+        PREPROCESS()  # 3.2 blacklist filter
+        PREPROCESS()  # 3.3 V and N filter
         if t.lemma_ in cpnet_vocab and t.lemma_ not in blacklist \
         and t.lemma_ in model_vocab:
             if t.pos_ == "NOUN" or t.pos_ == "VERB":
@@ -54,9 +57,9 @@ def match_mentioned_concepts(sents, answers):
     for sid, s in tqdm(enumerate(sents), total=len(sents)):#, desc="grounding batch_id:%d"%batch_id):
         a = answers[sid]
 
+        PREPROCESS()  # 3. extract all 1-gram concepts from input(question) and lable(answer)
         all_concepts = hard_ground(s + ' ' + a)
         #print(all_concepts)
-        PREPROCESS()  # 3. extract all 1-gram concepts from input(question) and lable(answer)
         question_concepts = hard_ground(s)
         #print(question_concepts)
 
@@ -91,7 +94,7 @@ def grounding_sentences(src, tgt, type, path):
     
     with open(path + "/{}/concepts_nv.json".format(type), 'w') as f:
         for line in res:
-            PREPROCESS()  # 3.1 to json
+            PREPROCESS()  # 3.4 save to json
             json.dump(line, f)
             f.write('\n')
 

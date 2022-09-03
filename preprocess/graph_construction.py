@@ -16,8 +16,6 @@ from idea import PREPROCESS, QUESTION, IDEA
 
 nltk.download('stopwords')
 nltk_stopwords = nltk.corpus.stopwords.words('english')
-
-PREPROCESS()  # 2.1 custom stopwords
 nltk_stopwords += ["like", "gone", "did", "going", "would", "could", "get", "in", "up", "may", "wanter"]
 
 config = configparser.ConfigParser()
@@ -54,16 +52,18 @@ def save_cpnet():
     global concept2id, relation2id, id2relation, id2concept, blacklist
     load_resources()
 
-    PREPROCESS()  # 2. construct real graph
+    PREPROCESS()  # 2. construct real graph by traversing english triplets
     graph = nx.MultiDiGraph()
     with open(config["paths"]["conceptnet_en"], "r", encoding="utf8") as f:
         lines = f.readlines()
 
         def not_save(cpt):
+            PREPROCESS()  # 2.1 blacklist filter
             if cpt in blacklist:
                 return True
             IDEA()  # UNDO: only keep single word concept
             for t in cpt.split("_"):
+                PREPROCESS()  # 2.2 stopword filter
                 if t in nltk_stopwords:
                     return True
             return False
